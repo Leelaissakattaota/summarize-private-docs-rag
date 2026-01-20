@@ -32,9 +32,9 @@ It addresses the common challenge of LLMs having outdated knowledge or lacking a
 
 ## 🚀 How It Works
 
-1.  [cite_start]**Ingest:** The app downloads a raw text file (`companyPolicies.txt` [cite: 31]).
-2.  [cite_start]**Split:** The text is split into chunks to fit within the model's context window[cite: 36].
-3.  [cite_start]**Embed:** Chunks are converted into vectors and stored in ChromaDB[cite: 42].
+1.  **Ingest:** The app downloads a raw text file (`companyPolicies.txt` [cite: 31]).
+2.  **Split:** The text is split into chunks to fit within the model's context window[cite: 36].
+3.  **Embed:** Chunks are converted into vectors and stored in ChromaDB[cite: 42].
 4.  **Retrieve:** When you ask a question, the system finds the most relevant chunks.
 5.  **Generate:** The LLM uses those chunks to answer your question accurately.
 
@@ -54,7 +54,7 @@ It addresses the common challenge of LLMs having outdated knowledge or lacking a
 
 3.  **Configure API Keys:**
     - If running locally, you need an IBM Cloud API key and Project ID.
-    - [cite_start]Open the notebook and update the `credentials` dictionary[cite: 48]:
+    - Open the notebook and update the `credentials` dictionary:
       ```python
       credentials = {
           "url": "[https://us-south.ml.cloud.ibm.com](https://us-south.ml.cloud.ibm.com)",
