@@ -1,93 +1,47 @@
-# 📄 Summarize Private Documents using RAG, LangChain, and LLMs
+# 📄 Summarize Private Documents Using RAG, LangChain & LLMs
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![LangChain](https://img.shields.io/badge/LangChain-v0.1-green)
-![IBM watsonx.ai](https://img.shields.io/badge/IBM%20watsonx.ai-Powered-purple)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![Language](https://img.shields.io/badge/Language-Python%203.11-3776AB?style=flat-square&logo=python&logoColor=white)
+![Framework](https://img.shields.io/badge/Framework-LangChain%200.1-FF6B35?style=flat-square)
+![LLM](https://img.shields.io/badge/LLM-IBM%20Flan--UL2%20%7C%20Granite%203.3-052FAD?style=flat-square&logo=ibm&logoColor=white)
+![VectorDB](https://img.shields.io/badge/VectorDB-ChromaDB-2E7D32?style=flat-square)
+![Embeddings](https://img.shields.io/badge/Embeddings-HuggingFace%20SentenceTransformers-FFD21E?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen?style=flat-square)
 
 ## 📌 Project Overview
+End-to-end **RAG pipeline for private document Q&A and summarization** using LangChain, IBM Watsonx (Flan-UL2 + Granite 3.3), HuggingFace embeddings, and ChromaDB. Loads a company policy document, splits it into chunks, embeds into a vector store, and answers questions like "What is the mobile policy?" using `RetrievalQA`.
 
-This project demonstrates how to build a **Retrieval-Augmented Generation (RAG)** application capable of reading, summarizing, and answering questions from private documents (e.g., company policies) that a standard Large Language Model (LLM) would not know about.
+**Domain:** RAG — Private Document Intelligence  
+**LLMs:** IBM Flan-UL2 + IBM Granite 3.3 8B (Watsonx)  
+**Embeddings:** HuggingFace SentenceTransformers  
+**Vector Store:** ChromaDB  
 
-It addresses the common challenge of LLMs having outdated knowledge or lacking access to private, proprietary data. By implementing a RAG pipeline, this tool retrieves relevant context from your documents and uses it to generate accurate, evidence-based answers.
+## 🚀 RAG Pipeline
+```
+companyPolicies.txt
+  → TextLoader → CharacterTextSplitter (1000 chars, 0 overlap)
+  → HuggingFaceEmbeddings → ChromaDB vector store
+  → RetrievalQA (stuff chain) + IBM Watsonx LLM
+  → Q&A: "What is mobile policy?" / "Summarize this document"
+```
 
-## 🤖 Key Features
+## 🔑 Key Code
+```python
+# Split
+texts = CharacterTextSplitter(chunk_size=1000).split_documents(documents)
 
-- **Document Ingestion:** Automatically downloads and processes private text documents (e.g., Company Policies).
-- **Smart Chunking:** Uses LangChain's `CharacterTextSplitter` to break large documents into manageable 1000-character chunks for efficient processing.
-- **Vector Search:** Converts text into vector embeddings using `HuggingFaceEmbeddings` and stores them in **ChromaDB** for fast retrieval.
-- **Hallucination Prevention:** Includes custom `PromptTemplate` engineering to ensure the model says "I don't know" instead of inventing answers when data is missing.
-- **Conversational Memory:** Implements `ConversationBufferMemory`, allowing the chatbot to remember context from previous questions (e.g., understanding what "it" refers to).
-- **Interactive Agent:** Features a loop that allows continuous interaction with the document until the user types "quit".
+# Embed + Store
+docsearch = Chroma.from_documents(texts, HuggingFaceEmbeddings())
 
-## 🛠️ Tech Stack
+# RAG Q&A
+qa = RetrievalQA.from_chain_type(llm=flan_ul2_llm,
+                                  chain_type="stuff",
+                                  retriever=docsearch.as_retriever())
+qa.invoke("Can you summarize the document for me?")
+```
 
-- **Language:** Python 3
-- **Orchestration:** [LangChain](https://www.langchain.com/)
-- **LLM Provider:** [IBM watsonx.ai](https://www.ibm.com/products/watsonx-ai)
-  - *Models used:* `ibm/granite-3-3-8b-instruct` and `google/flan-ul2`
-- **Embeddings:** Hugging Face (`sentence-transformers`)
-- **Vector Database:** [ChromaDB](https://www.trychroma.com/)
-- **Utilities:** `wget` (for data downloading)
+## 🎓 Skills Demonstrated
+LangChain RAG · TextLoader + CharacterTextSplitter · HuggingFace embeddings · ChromaDB · RetrievalQA chain · IBM Flan-UL2 + Granite 3.3 · Private document Q&A
 
-## 🚀 How It Works
-
-1.  **Ingest:** The app downloads a raw text file (`companyPolicies.txt` [cite: 31]).
-2.  **Split:** The text is split into chunks to fit within the model's context window[cite: 36].
-3.  **Embed:** Chunks are converted into vectors and stored in ChromaDB[cite: 42].
-4.  **Retrieve:** When you ask a question, the system finds the most relevant chunks.
-5.  **Generate:** The LLM uses those chunks to answer your question accurately.
-
-## 📦 Installation & Setup
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/YOUR-USERNAME/summarize-private-docs-rag.git](https://github.com/YOUR-USERNAME/summarize-private-docs-rag.git)
-    cd summarize-private-docs-rag
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *(See `requirements.txt` for specific versions of `langchain`, `ibm-watsonx-ai`, `chromadb`, etc.)*
-
-3.  **Configure API Keys:**
-    - If running locally, you need an IBM Cloud API key and Project ID.
-    - Open the notebook and update the `credentials` dictionary:
-      ```python
-      credentials = {
-          "url": "[https://us-south.ml.cloud.ibm.com](https://us-south.ml.cloud.ibm.com)",
-          "api_key": "YOUR_IBM_API_KEY" # Uncomment and add your key
-      }
-      project_id = "YOUR_PROJECT_ID"
-      ```
-
-4.  **Run the Notebook:**
-    Launch Jupyter Lab or Notebook:
-    ```bash
-    jupyter lab "Summarize private documents using RAG LangChain and LLMs.ipynb"
-    ```
-
-## 📊 Usage Examples
-
-**Scenario 1: Fact Retrieval**
-> **User:** "What is the smoking policy?"
->
-> **AI:** "Smoking is only permitted in designated smoking areas... Smoking inside company buildings is strictly prohibited."
-
-**Scenario 2: Handling Unknowns (Prompt Engineering)**
-> **User:** "Can I eat in company vehicles?"
->
-> **AI:** "I don't know... The document does not mention eating in vehicles." *(Prevents hallucination)*
-
-**Scenario 3: Conversational Memory**
-> **User:** "What is the mobile policy?"
-> **AI:** "It outlines standards for responsible mobile usage..."
->
-> **User:** "List points in it." *(The AI remembers "it" refers to the mobile policy)*
-> **AI:** "1. Acceptable Use, 2. Security, 3. Confidentiality..."
-
-## 🤝 Acknowledgments
-
-This project is based on a lab from the **IBM RAG and Agentic AI Professional Certificate** on Coursera/IBM Skills Network.
+## 🤝 Connect
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Leela%20A-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leela-a)
+[![Gmail](https://img.shields.io/badge/Gmail-attotaleelaissak@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:attotaleelaissak@gmail.com)
